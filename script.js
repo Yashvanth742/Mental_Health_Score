@@ -10,7 +10,7 @@
 --------------------------------------------------------- */
 
 const CANDIDATE_PORTS = [2200, 8000, 5000, 8080];
-let activeApiUrl = `http://127.0.0.1:${CANDIDATE_PORTS[0]}`;
+let activeApiUrl = `https://mental-health-score-l050.onrender.com:${CANDIDATE_PORTS[0]}`;
 
 function getPredictUrl() {
     return `${activeApiUrl}/Predict`;
