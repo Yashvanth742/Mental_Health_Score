@@ -8,9 +8,8 @@
 /* ---------------------------------------------------------
    API CONFIGURATION & AUTO-DETECTION
 --------------------------------------------------------- */
-
-const CANDIDATE_PORTS = [2200, 8000, 5000, 8080];
-let activeApiUrl = `https://mental-health-score-l050.onrender.com:${CANDIDATE_PORTS[0]}`;
+const API_URL = "https://mental-health-score-1050.onrender.com";
+const PREDICT_URL = `${API_URL}/Predict`;
 
 function getPredictUrl() {
     return `${activeApiUrl}/Predict`;
