@@ -12,7 +12,7 @@ const API_URL = "https://mental-health-score-1050.onrender.com";
 const PREDICT_URL = `${API_URL}/Predict`;
 
 function getPredictUrl() {
-    return `${activeApiUrl}/Predict`;
+    return `${API_URL}/Predict`;
 }
 
 
@@ -322,7 +322,7 @@ async function testApiPort(port) {
 
 async function checkApiStatus() {
     // First try activeApiUrl
-    const currentPortMatch = activeApiUrl.match(/:(\d+)$/);
+    const currentPortMatch = API_URL.match(/:(\d+)$/);
     const currentPort = currentPortMatch ? parseInt(currentPortMatch[1], 10) : CANDIDATE_PORTS[0];
 
     let foundUrl = await testApiPort(currentPort);
@@ -337,7 +337,7 @@ async function checkApiStatus() {
     }
 
     if (foundUrl) {
-        activeApiUrl = foundUrl;
+        API_URL = foundUrl;
         setApiStatus(true, foundUrl);
     } else {
         setApiStatus(false);
@@ -345,7 +345,7 @@ async function checkApiStatus() {
 }
 
 
-function setApiStatus(online, connectedUrl = activeApiUrl) {
+function setApiStatus(online, connectedUrl = API_URL) {
 
     if (!statusDot || !statusText) return;
 
@@ -860,7 +860,7 @@ if (form) {
 
 
                 showAlert(
-                    `Unable to connect to the prediction service (${activeApiUrl}). Please make sure the FastAPI backend is running.`
+                    `Unable to connect to the prediction service (${API_URL}). Please make sure the FastAPI backend is running.`
                 );
 
 
