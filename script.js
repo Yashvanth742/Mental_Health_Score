@@ -8,7 +8,8 @@
 /* ---------------------------------------------------------
    API CONFIGURATION & AUTO-DETECTION
 --------------------------------------------------------- */
-const API_URL = "https://mental-health-score-1050.onrender.com";
+let API_URL = "https://mental-health-score-l050.onrender.com";
+let activeApiUrl = API_URL;
 const PREDICT_URL = `${API_URL}/Predict`;
 
 function getPredictUrl() {
@@ -304,11 +305,12 @@ function populateCountries() {
    API STATUS & PORT DISCOVERY
 --------------------------------------------------------- */
 
-async function testApiPort(port) {
-    const url = `http://127.0.0.1:${port}`;
+const CANDIDATE_PORTS = [8000, 8001, 5000, 8080];
+
+async function testApiUrl(url) {
     try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 2000);
+        const timeout = setTimeout(() => controller.abort(), 4000);
         const response = await fetch(url, {
             method: "GET",
             signal: controller.signal
@@ -320,24 +322,33 @@ async function testApiPort(port) {
     }
 }
 
+async function testApiPort(port) {
+    return await testApiUrl(`http://127.0.0.1:${port}`);
+}
+
 async function checkApiStatus() {
-    // First try activeApiUrl
-    const currentPortMatch = API_URL.match(/:(\d+)$/);
-    const currentPort = currentPortMatch ? parseInt(currentPortMatch[1], 10) : CANDIDATE_PORTS[0];
+    // 1. Try configured backend URL
+    let foundUrl = await testApiUrl(API_URL);
 
-    let foundUrl = await testApiPort(currentPort);
-
+    // 2. Fallback to candidate local ports
     if (!foundUrl) {
-        // Try other candidate ports
-        for (const port of CANDIDATE_PORTS) {
-            if (port === currentPort) continue;
-            foundUrl = await testApiPort(port);
-            if (foundUrl) break;
+        const currentPortMatch = API_URL.match(/:(\d+)$/);
+        const currentPort = currentPortMatch ? parseInt(currentPortMatch[1], 10) : CANDIDATE_PORTS[0];
+
+        foundUrl = await testApiPort(currentPort);
+
+        if (!foundUrl) {
+            for (const port of CANDIDATE_PORTS) {
+                if (port === currentPort) continue;
+                foundUrl = await testApiPort(port);
+                if (foundUrl) break;
+            }
         }
     }
 
     if (foundUrl) {
         API_URL = foundUrl;
+        activeApiUrl = foundUrl;
         setApiStatus(true, foundUrl);
     } else {
         setApiStatus(false);
@@ -354,11 +365,13 @@ function setApiStatus(online, connectedUrl = API_URL) {
         statusDot.className =
             "status-dot online";
 
-        const portMatch = connectedUrl.match(/:(\d+)$/);
-        const portStr = portMatch ? `:${portMatch[1]}` : "";
-
-        statusText.textContent =
-            `API Connected (${portStr})`;
+        if (connectedUrl && connectedUrl.includes("onrender.com")) {
+            statusText.textContent = "API Connected";
+        } else {
+            const portMatch = connectedUrl ? connectedUrl.match(/:(\d+)$/) : null;
+            const portStr = portMatch ? ` (:${portMatch[1]})` : "";
+            statusText.textContent = `API Connected${portStr}`;
+        }
 
     } else {
 
